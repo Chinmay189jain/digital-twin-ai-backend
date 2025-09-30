@@ -26,7 +26,4 @@ public class ConstantsTemplate {
     public static final String USER_TWIN_INSTRUCTIONS =
             "Now answer this question like I would:\n";
 
-    // --- AI Model ---
-    public static final String AI_MODEL = "llama3-70b-8192";
-
 }
