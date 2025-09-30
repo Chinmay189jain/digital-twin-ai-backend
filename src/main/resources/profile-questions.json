@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "prefix": "My age range is ",
+    "question": "What's your age range?",
+    "type": "SELECT",
+    "options": ["Under 18", "18-25", "26-35", "36-45", "46+"]
+  },
+  {
+    "id": 2,
+    "prefix": "My highest level of education is ",
+    "question": "What's your highest level of education?",
+    "type": "SELECT",
+    "options": ["High School","Bachelor's Degree","Master's Degree","PhD/Doctorate","Other/Trade School","Prefer not to say"]
+  },
+  {
+    "id": 3,
+    "prefix": "My profession or field of work is ",
+    "question": "What's your profession or field of work?",
+    "type": "TEXT",
+    "placeholder": "e.g., Software Engineer, Teacher, Student"
+  },
+  {
+    "id": 4,
+    "prefix": "My experience lies between ",
+    "question": "How many years of experience do you have in your field?",
+    "type": "SELECT",
+    "options": ["Less than 1 year","1-3 years","3-5 years","5-10 years","10-15 years","15+ years"]
+  },
+  {
+    "id": 5,
+    "prefix": "My primary goal right now is ",
+    "question": "What's your primary goal right now?",
+    "type": "SELECT",
+    "options": ["Career advancement","Personal growth","Building relationships","Health and fitness","Financial stability","Travel and experiences","Education"]
+  },
+  {
+    "id": 6,
+    "prefix": "I would describe my personality as ",
+    "question": "How would you describe your personality?",
+    "type": "RADIO",
+    "options": ["Introverted and reflective","Extroverted and social","Balanced mix of both","Depends on the situation"]
+  },
+  {
+    "id": 7,
+    "prefix": "My preferred communication style is ",
+    "question": "What's your preferred communication style?",
+    "type": "RADIO",
+    "options": ["Direct and straightforward","Friendly and casual","Professional and formal","Detailed and thorough"]
+  },
+  {
+    "id": 8,
+    "prefix": "My main main interests or hobbies are ",
+    "question": "What are your main interests or hobbies?",
+    "type": "TEXT",
+    "placeholder": "e.g., Reading, Gaming, Cooking, Sports"
+  },
+  {
+    "id": 9,
+    "prefix": "I prefer to spend time by ",
+    "question": "How do you prefer to spend your free time?",
+    "type": "SELECT",
+    "options": ["Socializing with friends","Pursuing hobbies alone","Learning new skills","Relaxing and unwinding","Outdoor activities","Entertainment (movies, games, etc.)"]
+  },
+  {
+    "id": 10,
+    "prefix": "Something unique about myself is ",
+    "question": "Tell us something unique about yourself",
+    "type": "TEXT",
+    "placeholder": "Share an interesting fact, talent, or experience that makes you unique"
+  }
+]

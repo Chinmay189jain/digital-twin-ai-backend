@@ -28,14 +28,20 @@ public class AIService {
 
     private static final Logger logger = LoggerFactory.getLogger(AIService.class);
 
-    public final WebClient webClient;
+    private final String AI_MODEL;
+
+    private final WebClient webClient;
 
     public AIService(@Value("${grok.api.url}") String apiUrl,
-                     @Value("${grok.api.key}") String apiKey) {
+                     @Value("${grok.api.key}") String apiKey,
+                     @Value("${grok.ai.model}") String aiModel) {
+
         this.webClient = WebClient.builder()
                 .baseUrl(apiUrl)
                 .defaultHeader("Authorization", "Bearer " + apiKey)
                 .build();
+
+        this.AI_MODEL = aiModel;
     }
 
     public String generateTwinProfile(List<String> userAnswers) {

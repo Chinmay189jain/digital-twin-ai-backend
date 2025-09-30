@@ -73,7 +73,7 @@ public class TwinChatService {
             twinChatSessionService.validateSession(sessionId);
 
             // Retrieve all chat interactions for the given session and user
-            List<TwinChat> chats = twinChatRepository.findByUserIdAndSessionIdOrderByTimestampDesc(email, sessionId);
+            List<TwinChat> chats = twinChatRepository.findByUserIdAndSessionIdOrderByTimestampAsc(email, sessionId);
 
             return chats.stream()
                     .map(chat -> new TwinAnswerResponse(
