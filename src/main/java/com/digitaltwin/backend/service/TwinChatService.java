@@ -1,15 +1,22 @@
 package com.digitaltwin.backend.service;
 
+import com.digitaltwin.backend.dto.ChatHistoryResponse;
 import com.digitaltwin.backend.dto.TwinAnswerResponse;
 import com.digitaltwin.backend.model.TwinChat;
 import com.digitaltwin.backend.model.TwinChatSession;
 import com.digitaltwin.backend.repository.TwinChatRepository;
 import com.mongodb.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TwinChatService {
@@ -63,7 +70,7 @@ public class TwinChatService {
     }
 
     // Retrieve chat history for a specific session
-    public List<TwinAnswerResponse> getChatHistory(String sessionId) {
+    public ChatHistoryResponse getChatHistory(String sessionId, int page, int size) {
         try {
             final String email = userService.getCurrentUserEmail();
 
@@ -72,16 +79,24 @@ public class TwinChatService {
             // Validate session ownership and existence
             twinChatSessionService.validateSession(sessionId);
 
-            // Retrieve all chat interactions for the given session and user
-            List<TwinChat> chats = twinChatRepository.findByUserIdAndSessionIdOrderByTimestampAsc(email, sessionId);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
 
-            return chats.stream()
+            // Retrieve all chat interactions for the given session and user
+            Slice<TwinChat> chats = twinChatRepository.findByUserIdAndSessionIdOrderByTimestampAsc(email, sessionId, pageable);
+
+            List<TwinAnswerResponse> messages = chats.getContent()
+                    .stream()
                     .map(chat -> new TwinAnswerResponse(
                             chat.getSessionId(),
                             chat.getQuestion(),
                             chat.getAiResponse(),
                             chat.getTimestamp()))
-                    .toList();
+                    .collect(Collectors.toList());
+
+            Collections.reverse(messages); // Reverse to have most recent messages first
+
+            return new ChatHistoryResponse(messages, chats.hasNext());
+
         } catch (Exception e) {
             throw new RuntimeException("Error in getChatHistory: " + e.getMessage());
         }
@@ -105,6 +120,14 @@ public class TwinChatService {
 
         } catch (Exception e) {
             throw new RuntimeException("Error in deleting chat history: " + e.getMessage());
+        }
+    }
+
+    public long deleteAllChatsByUserId(String userId) {
+        try {
+            return twinChatRepository.deleteByUserId(userId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in deleting chat by userId: " + e.getMessage());
         }
     }
 

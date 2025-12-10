@@ -132,4 +132,12 @@ public class TwinProfileService {
             throw new RuntimeException("Error creating prompt from profile answers: " + e.getMessage(), e);
         }
     }
+
+    public long deleteAllProfilesByUserId(String userId) {
+        try {
+            return twinProfileRepository.deleteByUserId(userId);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete twin profile by user ID", e);
+        }
+    }
 }

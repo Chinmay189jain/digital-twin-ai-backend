@@ -105,6 +105,14 @@ public class TwinChatSessionService {
         }
     }
 
+    public long deleteAllSessionsByUserId(String userId) {
+        try {
+            return twinChatSessionRepository.deleteByUserId(userId);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete chat sessions by user ID", e);
+        }
+    }
+
     // Utility method to check if a string is blank (null or empty after trimming)
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
 

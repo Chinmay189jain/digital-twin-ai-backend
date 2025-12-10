@@ -32,9 +32,9 @@ public class AIService {
 
     private final WebClient webClient;
 
-    public AIService(@Value("${grok.api.url}") String apiUrl,
-                     @Value("${grok.api.key}") String apiKey,
-                     @Value("${grok.ai.model}") String aiModel) {
+    public AIService(@Value("${groq.api.url}") String apiUrl,
+                     @Value("${groq.api.key}") String apiKey,
+                     @Value("${groq.ai.model}") String aiModel) {
 
         this.webClient = WebClient.builder()
                 .baseUrl(apiUrl)
@@ -59,14 +59,14 @@ public class AIService {
         );
 
         try {
-            // Make the API call to Grok AI to generate the profile summary
+            // Make the API call to AI to generate the profile summary
             AIResponse response = webClient.post()
                     .uri("/openai/v1/chat/completions")
                     .bodyValue(request)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, clientResponse ->
                             clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> Mono.error(new RuntimeException("GrokAI Error: " + errorBody)))
+                                    .flatMap(errorBody -> Mono.error(new RuntimeException("AI Error: " + errorBody)))
                     )
                     .bodyToMono(AIResponse.class)
                     .block();
@@ -77,14 +77,14 @@ public class AIService {
                 logger.info("Generated profile summary: {}", profileSummary);
                 return profileSummary;
             } else{
-                logger.error("Empty or null response from grok AI while generating profile");
+                logger.error("Empty or null response from AI while generating profile");
                 throw new RuntimeException("Failed to generate twin profile");
             }
 
         } catch (WebClientResponseException.TooManyRequests e) {
             throw new RuntimeException("Rate limit exceeded. Try again later." + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Error during Grok api call: " + e.getMessage());
+            throw new RuntimeException("Error during api call: " + e.getMessage());
         }
     }
 
@@ -105,14 +105,14 @@ public class AIService {
         );
 
         try {
-            // Make the API call to Grok AI to get the response for user question
+            // Make the API call to AI to get the response for user question
             AIResponse response = webClient.post()
                     .uri("/openai/v1/chat/completions")
                     .bodyValue(request)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, clientResponse ->
                             clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> Mono.error(new RuntimeException("GrokAI Error: " + errorBody)))
+                                    .flatMap(errorBody -> Mono.error(new RuntimeException("AI Error: " + errorBody)))
                     )
                     .bodyToMono(AIResponse.class)
                     .block();
@@ -123,14 +123,14 @@ public class AIService {
                 logger.info("Generated answer from user question: {}", answer);
                 return answer;
             } else{
-                logger.error("Empty or null response from grok AI while generating answer");
+                logger.error("Empty or null response from AI while generating answer");
                 throw new RuntimeException("Failed to generate answer for user question");
             }
 
         } catch (WebClientResponseException.TooManyRequests e) {
             throw new RuntimeException("Rate limit exceeded. Try again later.");
         } catch (Exception e) {
-            throw new RuntimeException("Error during Grok api call: " + e.getMessage());
+            throw new RuntimeException("Error during api call: " + e.getMessage());
         }
     }
 }
