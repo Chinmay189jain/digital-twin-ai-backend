@@ -9,4 +9,6 @@ public interface TwinProfileRepository extends MongoRepository<TwinProfile, Stri
 
     // Custom query to find a TwinProfile by userId
     Optional<TwinProfile> findByUserId(String userId);
+
+    long deleteByUserId(String userId);
 }

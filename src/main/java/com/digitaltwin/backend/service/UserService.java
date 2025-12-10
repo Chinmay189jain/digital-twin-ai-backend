@@ -32,4 +32,8 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName(); // This gives the email from JWT
     }
+
+    public void deleteByEmail(String email){
+        userRepository.deleteByEmail(email);
+    }
 }

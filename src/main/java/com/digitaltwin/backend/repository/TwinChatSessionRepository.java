@@ -12,4 +12,6 @@ public interface TwinChatSessionRepository extends MongoRepository<TwinChatSessi
 
     @Query("{ 'userId': ?0, 'title': { $regex: ?1, $options: 'i' } }")
     List<TwinChatSession> searchByTitle(String userId, String q);
+
+    long deleteByUserId(String userId);
 }

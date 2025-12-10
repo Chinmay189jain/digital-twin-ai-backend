@@ -1,5 +1,6 @@
 package com.digitaltwin.backend.controller;
 
+import com.digitaltwin.backend.dto.ChatHistoryResponse;
 import com.digitaltwin.backend.dto.ChatSessionListItem;
 import com.digitaltwin.backend.dto.TwinAnswerResponse;
 import com.digitaltwin.backend.dto.TwinQuestionRequest;
@@ -34,10 +35,15 @@ public class ChatController {
         return ResponseEntity.ok(twinChatSessionService.getAllSessions(searchQuery));
     }
 
-    // Endpoint to get chat history for a specific session
+    // Endpoint to get chat history for a specific session with pagination
     @GetMapping("/chat/{sessionId}")
-    public ResponseEntity<List<TwinAnswerResponse>> getChatHistory(@PathVariable String sessionId) {
-        return ResponseEntity.ok(twinChatService.getChatHistory(sessionId));
+    public ResponseEntity<ChatHistoryResponse> getChatHistory(
+            @PathVariable String sessionId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        ChatHistoryResponse response = twinChatService.getChatHistory(sessionId, page, size);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("chat/session/{sessionId}" )
