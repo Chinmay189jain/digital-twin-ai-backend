@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;">
+<div style="max-width:520px;margin:24px auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+
+    <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:18px 20px;color:#fff;">
+        <div style="font-size:14px;opacity:0.9;">Digital Twin AI</div>
+        <div style="font-size:20px;font-weight:700;margin-top:6px;">Email Verification OTP</div>
+    </div>
+
+    <div style="padding:20px;">
+        <p style="margin:0 0 12px 0;color:#111827;font-size:14px;">Hi,</p>
+        <p style="margin:0 0 14px 0;color:#374151;font-size:14px;line-height:1.5;">
+            Use the OTP below to verify your email. This code expires in
+            <b>{{EXPIRY_MINUTES}} {{EXPIRY_LABEL}}</b>.
+        </p>
+
+        <div style="text-align:center;margin:18px 0;">
+            <div style="display:inline-block;letter-spacing:6px;font-size:28px;font-weight:800;
+                    padding:14px 18px;border-radius:12px;background:#f3f4ff;color:#111827;
+                    border:1px dashed #c7d2fe;">
+                {{OTP}}
+            </div>
+        </div>
+
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;">
+            <p style="margin:0;color:#6b7280;font-size:12px;line-height:1.5;">
+                If you didn’t request this, you can safely ignore this email.
+            </p>
+        </div>
+
+        <p style="margin:16px 0 0 0;color:#374151;font-size:14px;">
+            Regards,<br/>
+            <b>Digital Twin AI</b>
+        </p>
+    </div>
+
+    <div style="padding:12px 20px;background:#ffffff;color:#9ca3af;font-size:11px;border-top:1px solid #f3f4f6;">
+        Sent to: {{EMAIL}}
+    </div>
+</div>
+</body>
+</html>
