@@ -26,4 +26,12 @@ public class ConstantsTemplate {
     public static final String USER_TWIN_INSTRUCTIONS =
             "Now answer this question like I would:\n";
 
+    // --- OTP mail messages ---
+    public static final String OTP_EMAIL_SUBJECT = "🔐 Your OTP for Digital Twin AI";
+
+    public static final String prefix_OTP_EMAIL_BODY =
+            "Hi,\n\nYour OTP code is: ";
+
+    public static final String suffix_OTP_EMAIL_BODY =
+            "\nIt will expire in 1 minute.\n\nRegards,\nDigital Twin AI";
 }

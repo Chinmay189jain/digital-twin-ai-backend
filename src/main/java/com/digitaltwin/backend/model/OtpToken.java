@@ -7,24 +7,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
-@Document("users")
+@Document(collection = "otp_tokens")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class OtpToken {
 
     @Id
-    private String id;
-
-    private String name;
     private String email;
-    private String password; // This will be encrypted later
-    private boolean isVerified = false;
-
-    @CreatedDate
-    private Instant createdAt;
+    private String otp;
+    private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
 }
