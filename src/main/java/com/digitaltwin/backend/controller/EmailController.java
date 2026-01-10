@@ -1,7 +1,7 @@
 package com.digitaltwin.backend.controller;
 
 import com.digitaltwin.backend.dto.JwtResponse;
-import com.digitaltwin.backend.service.EmailService;
+import com.digitaltwin.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.*;
 public class EmailController {
 
     @Autowired
-    private EmailService emailService;
+    private UserService userService;
 
     @PostMapping("/verify/send")
-    public ResponseEntity<?> sendOtp() {
-        emailService.sendVerificationEmail();
-        return ResponseEntity.ok("Verification email sent");
+    public ResponseEntity<?> requestAccountVerificationOtp() {
+        userService.sendAccountVerificationEmail();
+        return ResponseEntity.ok("Email sent successfully");
     }
 
     @PostMapping("/verify/confirm")
-    public ResponseEntity<JwtResponse> confirmOtp(@RequestBody String otp) {
-        return ResponseEntity.ok(emailService.confirmVerificationOtp(otp));
+    public ResponseEntity<JwtResponse> verifyAccountVerificationOtp(@RequestBody String otp) {
+        return ResponseEntity.ok(userService.validateAccountVerificationOtp(otp));
     }
 }

@@ -1,10 +1,7 @@
 package com.digitaltwin.backend.service;
 
-import com.digitaltwin.backend.dto.JwtResponse;
 import com.digitaltwin.backend.model.OtpToken;
-import com.digitaltwin.backend.model.User;
 import com.digitaltwin.backend.repository.OtpTokenRepository;
-import com.digitaltwin.backend.security.JwtService;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -16,27 +13,33 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
-
-import static com.digitaltwin.backend.util.ConstantsTemplate.OTP_EMAIL_SUBJECT;
+import static com.digitaltwin.backend.util.ConstantsTemplate.*;
 
 @Service
 public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-    private static final int OTP_LENGTH = 6;
-    private static final int OTP_EXPIRY_MINUTES = 5;
-    private static final int OTP_RESEND_WAIT_SECONDS = 300; // 5 minutes
 
-    @Autowired
-    private UserService userService;
+    @Value("${otp.length}")
+    private int otpLength;
+
+    @Value("${otp.expiry-minutes}")
+    private int otpExpiryMinutes;
+
+    @Value("${otp.resend-wait-seconds}")
+    private int otpResendWaitSeconds;
+
+    @Value("${spring.mail.username}")
+    private String senderEmail;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -48,30 +51,31 @@ public class EmailService {
     private ResourceLoader resourceLoader;
 
     @Autowired
-    private JwtService jwtService;
+    private PasswordEncoder passwordEncoder;
 
-    @Value("${spring.mail.username}")
-    private String senderEmail;
-
-    public synchronized void sendVerificationEmail(String userEmail) {
+    public void generateOtp(String userEmail, OtpPurpose purpose) {
         try {
-            Optional<OtpToken> existingTokenOpt = otpTokenRepository.findByEmail(userEmail);
+            Optional<OtpToken> existingTokenOpt = otpTokenRepository.findByEmailAndPurpose(userEmail, purpose);
             if (existingTokenOpt.isPresent()) {
-                LocalDateTime lastSentTime = existingTokenOpt.get().getCreatedAt();
-                if (lastSentTime != null && lastSentTime.isAfter(LocalDateTime.now().minusSeconds(OTP_RESEND_WAIT_SECONDS))) {
+                LocalDateTime lastSentTime = existingTokenOpt.get().getLastSentAt();
+                if (lastSentTime != null && lastSentTime.isAfter(LocalDateTime.now().minusSeconds(otpResendWaitSeconds))) {
                     throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Please wait before requesting another OTP.");
                 }
             }
 
             String otp = generateOtp();
+
+            LocalDateTime now = LocalDateTime.now();
+            otpTokenRepository.deleteByEmailAndPurpose(userEmail, purpose);
             otpTokenRepository.save(OtpToken.builder()
                     .email(userEmail)
-                    .otp(otp)
-                    .createdAt(LocalDateTime.now())
-                    .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
+                    .otpHash(passwordEncoder.encode(otp))
+                    .purpose(purpose)
+                    .lastSentAt(now)
+                    .expiresAt(now.plusMinutes(otpExpiryMinutes))
                     .build());
 
-            sendOtpEmail(userEmail, otp);
+            sendEmail(userEmail, otp, purpose);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -80,7 +84,8 @@ public class EmailService {
         }
     }
 
-    public void sendOtpEmail(String userEmail, String otp) {
+    @Async
+    public void sendEmail(String userEmail, String otp, OtpPurpose purpose) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
@@ -89,7 +94,7 @@ public class EmailService {
             helper.setTo(userEmail);
             helper.setSubject(OTP_EMAIL_SUBJECT);
 
-            String html = loadAndPopulateHtmlTemplate(userEmail, otp);
+            String html = loadAndPopulateHtmlTemplate(userEmail, otp, purpose);
             helper.setText(html, true);
 
             mailSender.send(message);
@@ -97,73 +102,47 @@ public class EmailService {
 
         } catch (Exception e) {
             logger.error("❌ Failed to send OTP email to: {}", userEmail, e);
+            otpTokenRepository.deleteByEmailAndPurpose(userEmail, purpose);
         }
     }
 
-    public boolean verifyOtp(String userEmail, String otp) {
-        return otpTokenRepository.findByEmail(userEmail)
+    public boolean validateOtp(String userEmail, String otp, OtpPurpose purpose) {
+        return otpTokenRepository.findByEmailAndPurpose(userEmail, purpose)
                 .filter(token -> {
-                    boolean matches = token.getOtp().equals(otp);
+                    boolean matches = passwordEncoder.matches(otp, token.getOtpHash());
                     boolean notExpired = token.getExpiresAt().isAfter(LocalDateTime.now());
                     if (!matches) logger.warn("Invalid OTP for email {}", userEmail);
                     if (!notExpired) logger.warn("Expired OTP for email {}", userEmail);
                     return matches && notExpired;
                 })
                 .map(token -> {
-                    otpTokenRepository.delete(token);
+                    otpTokenRepository.deleteByEmailAndPurpose(userEmail, purpose);
                     return true;
                 })
                 .orElse(false);
     }
 
-    public void sendVerificationEmail() {
-        String userEmail = userService.getCurrentUserEmail();
-        User user = userService.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.isVerified()) {
-            sendVerificationEmail(userEmail);
-        }
-    }
-
-    public JwtResponse confirmVerificationOtp(String otp) {
-        String userEmail = userService.getCurrentUserEmail();
-        User user = userService.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (user.isVerified()) {
-            String token = jwtService.generateToken(user);
-            return new JwtResponse(token);
-        }
-
-        boolean isValid = verifyOtp(userEmail, otp);
-        if (isValid) {
-            user.setVerified(true);
-            userService.saveUser(user);
-        } else{
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired OTP");
-        }
-
-        String token = jwtService.generateToken(user);
-        return new JwtResponse(token);
-    }
-
     private String generateOtp() {
-        int min = (int) Math.pow(10, OTP_LENGTH - 1);
-        int max = (int) Math.pow(10, OTP_LENGTH) - 1;
-        return String.valueOf(new Random().nextInt(max - min + 1) + min);
+        int min = (int) Math.pow(10, otpLength - 1);
+        int max = (int) Math.pow(10, otpLength) - 1;
+        return String.valueOf(new SecureRandom().nextInt(max - min + 1) + min);
     }
 
-    private String loadAndPopulateHtmlTemplate(String email, String otp) {
+    private String loadAndPopulateHtmlTemplate(String email, String otp, OtpPurpose purpose) {
         try {
             Resource resource = resourceLoader.getResource("classpath:templates/otp-template.html");
             String template = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
+            String HEADING = purpose == OtpPurpose.PASSWORD_RESET ? PASSWORD_RESET_OTP_HEADER : ACCOUNT_VERIFICATION_OTP_HEADER;
+            String MESSAGE = purpose == OtpPurpose.PASSWORD_RESET ? PASSWORD_RESET_OTP_MESSAGE : ACCOUNT_VERIFICATION_OTP_MESSAGE;
+
             return template
                     .replace("{{EMAIL}}", email)
                     .replace("{{OTP}}", otp)
-                    .replace("{{EXPIRY_MINUTES}}", String.valueOf(OTP_EXPIRY_MINUTES))
-                    .replace("{{EXPIRY_LABEL}}", "minute");
+                    .replace("{{EXPIRY_MINUTES}}", String.valueOf(otpExpiryMinutes))
+                    .replace("{{EXPIRY_LABEL}}", "minute")
+                    .replace("{{HEADING}}", HEADING)
+                    .replace("{{MESSAGE}}", MESSAGE);
 
         } catch (Exception e) {
             logger.error("❌ Failed to load OTP HTML template", e);

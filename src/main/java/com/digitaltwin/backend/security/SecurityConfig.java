@@ -31,7 +31,8 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Allow unauthenticated access to /auth
+                    .requestMatchers("/api/auth/**").permitAll() // Allow unauthenticated access to /auth
+                    .requestMatchers("/api/password/change/forgot/**").permitAll() // Allow unauthenticated access to password reset
                 .anyRequest().authenticated() // Require auth for everything else
             )
                 .exceptionHandling(ex -> ex
