@@ -7,6 +7,7 @@ import com.digitaltwin.backend.model.User;
 import com.digitaltwin.backend.repository.UserRepository;
 import com.digitaltwin.backend.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -31,6 +33,9 @@ public class UserService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private EmailService emailService;
 
     public User saveUser(User user) {
         return userRepository.save(user);
@@ -54,7 +59,7 @@ public class UserService {
     public ResponseEntity<?> registerUser(UserRegistration request){
         // Check if email is already registered
         if (findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+            return ResponseEntity.badRequest().body("User with this email already exists");
         }
 
         // Create new user with encoded password
@@ -78,7 +83,7 @@ public class UserService {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid email or password");
+            return ResponseEntity.status(401).body("Invalid email or password, Enter correct credentials");
         }
 
         User user = findByEmail(request.getEmail())
@@ -87,4 +92,38 @@ public class UserService {
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(token));
     }
+
+    // Send account verification email to the current user
+    public void sendAccountVerificationEmail() {
+        String userEmail = getCurrentUserEmail();
+        User user = findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (!user.isVerified()) {
+            emailService.generateOtp(userEmail, OtpPurpose.ACCOUNT_VERIFICATION);
+        }
+    }
+
+    public JwtResponse validateAccountVerificationOtp(String otp) {
+        String userEmail = getCurrentUserEmail();
+        User user = findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (user.isVerified()) {
+            String token = jwtService.generateToken(user);
+            return new JwtResponse(token);
+        }
+
+        boolean isValid = emailService.validateOtp(userEmail, otp, OtpPurpose.ACCOUNT_VERIFICATION);
+        if (isValid) {
+            user.setVerified(true);
+            saveUser(user);
+        } else{
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired OTP");
+        }
+
+        String token = jwtService.generateToken(user);
+        return new JwtResponse(token);
+    }
+
 }

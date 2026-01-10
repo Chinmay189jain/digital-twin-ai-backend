@@ -1,6 +1,5 @@
 package com.digitaltwin.backend.security;
 
-import com.digitaltwin.backend.dto.LoginRequest;
 import com.digitaltwin.backend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class JwtService {
@@ -23,6 +24,9 @@ public class JwtService {
     @Value("${jwt.expiration-in-ms}")
     private long expirationInMs;
 
+    @Value("${jwt.password-reset-expiration-in-ms}")
+    private long passwordResetExpirationInMs;
+
     private Key key;
 
     @PostConstruct
@@ -32,10 +36,34 @@ public class JwtService {
 
     // Generate token
     public String generateToken(User user) {
+        return buildToken(
+                Map.of(
+                        "username", user.getName(),
+                        "verified", user.isVerified(),
+                        "purpose", TokenPurpose.AUTH
+                ),
+                user.getEmail(),
+                expirationInMs
+        );
+    }
+
+    // Generate password reset token
+    public String generatePasswordResetToken(User user) {
+        return buildToken(
+                Map.of(
+                        "username", user.getName(),
+                        "purpose", TokenPurpose.PASSWORD_RESET
+                ),
+                user.getEmail(),
+                passwordResetExpirationInMs
+        );
+    }
+
+    // Build token
+    public String buildToken(Map<String, Object> claims, String subject, long expirationInMs) {
         return Jwts.builder()
-                .setSubject(user.getEmail())
-                .claim("username", user.getName())
-                .claim("verified", user.isVerified())
+                .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationInMs))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -56,5 +84,19 @@ public class JwtService {
     public String extractEmail(String token) {
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         return claims.getSubject();
+    }
+
+    // Extract purpose
+    public String extractPurpose(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return String.valueOf(claims.get("purpose"));
+    }
+
+    public boolean isAuthToken(String token) {
+        return Objects.equals(extractPurpose(token), TokenPurpose.AUTH.name());
+    }
+
+    public boolean isPasswordResetToken(String token) {
+        return Objects.equals(extractPurpose(token), TokenPurpose.PASSWORD_RESET.name());
     }
 }

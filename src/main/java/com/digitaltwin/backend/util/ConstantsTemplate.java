@@ -29,9 +29,15 @@ public class ConstantsTemplate {
     // --- OTP mail messages ---
     public static final String OTP_EMAIL_SUBJECT = "🔐 Your OTP for Digital Twin AI";
 
-    public static final String prefix_OTP_EMAIL_BODY =
-            "Hi,\n\nYour OTP code is: ";
+    public static final String ACCOUNT_VERIFICATION_OTP_HEADER =
+            "Email Verification OTP";
 
-    public static final String suffix_OTP_EMAIL_BODY =
-            "\nIt will expire in 1 minute.\n\nRegards,\nDigital Twin AI";
+    public static final String ACCOUNT_VERIFICATION_OTP_MESSAGE =
+            "Welcome to Digital Twin AI! Use the OTP below to verify your account.\n";
+
+    public static final String PASSWORD_RESET_OTP_HEADER =
+            "Password Reset OTP";
+
+    public static final String PASSWORD_RESET_OTP_MESSAGE =
+            "We received a request to reset your account password. Use the OTP below to continue.\n";
 }
