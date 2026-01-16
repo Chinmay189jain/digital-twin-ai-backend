@@ -1,9 +1,10 @@
 package com.digitaltwin.backend.controller;
 
-import com.digitaltwin.backend.dto.ProfileAnswersRequest;
-import com.digitaltwin.backend.dto.ProfileResponse;
+import com.digitaltwin.backend.dto.TwinProfileRequest;
+import com.digitaltwin.backend.dto.TwinProfileResponse;
 import com.digitaltwin.backend.model.ProfileQuestion;
 import com.digitaltwin.backend.service.TwinProfileService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,19 +27,19 @@ public class ProfileController {
 
     //Generate twin profile based on user answers
     @PostMapping("/generate-profile")
-    public ResponseEntity<String> generateTwinProfile(@RequestBody Map<Integer, String> profileAnswersMap) {
-        return ResponseEntity.ok(twinProfileService.generateProfile(profileAnswersMap));
+    public ResponseEntity<String> generateTwinProfile(@Valid @RequestBody TwinProfileRequest twinProfileRequest) {
+        return ResponseEntity.ok(twinProfileService.generateProfile(twinProfileRequest));
     }
 
     //Generate twin profile based on user answers
     @PostMapping("/update-profile")
-    public ResponseEntity<String> updateTwinProfile(@RequestBody Map<Integer, String> profileAnswersMap) {
-        return ResponseEntity.ok(twinProfileService.updateProfile(profileAnswersMap));
+    public ResponseEntity<TwinProfileResponse> updateTwinProfile(@Valid @RequestBody TwinProfileRequest twinProfileRequest) {
+        return ResponseEntity.ok(twinProfileService.updateProfile(twinProfileRequest));
     }
 
     // Get the digital twin profile
     @GetMapping("/get-profile")
-    public ResponseEntity<ProfileResponse> getTwinProfile() {
+    public ResponseEntity<TwinProfileResponse> getTwinProfile() {
         return ResponseEntity.ok(twinProfileService.getProfile());
     }
 }

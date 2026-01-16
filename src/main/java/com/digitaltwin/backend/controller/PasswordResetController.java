@@ -4,6 +4,7 @@ import com.digitaltwin.backend.dto.ResetPasswordRequest;
 import com.digitaltwin.backend.dto.JwtResponse;
 import com.digitaltwin.backend.dto.OtpRequest;
 import com.digitaltwin.backend.service.PasswordResetService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,20 +17,20 @@ public class PasswordResetController {
     private PasswordResetService passwordResetService;
 
     @PostMapping("/forgot/mail/send")
-    public ResponseEntity<?> requestPasswordResetOtp(@RequestBody OtpRequest.SendOtpRequest request) {
+    public ResponseEntity<?> requestPasswordResetOtp(@Valid  @RequestBody OtpRequest.SendOtpRequest request) {
         passwordResetService.sendPasswordResetEmail(request.getEmail());
         return ResponseEntity.ok("Email sent successfully");
     }
 
     @PostMapping("/forgot/mail/verify")
-    public ResponseEntity<JwtResponse> verifyPasswordResetOtp(@RequestBody OtpRequest.VerifyOtpRequest request) {
+    public ResponseEntity<JwtResponse> verifyPasswordResetOtp(@Valid @RequestBody OtpRequest.VerifyOtpRequest request) {
         return ResponseEntity.ok(passwordResetService.validatePasswordResetOtp(request.getEmail(), request.getOtpCode()));
     }
 
     @PostMapping("/forgot/reset")
     public ResponseEntity<?> resetForgottenPassword(
             @RequestHeader(name = "Authorization", required = false) String authorization,
-            @RequestBody ResetPasswordRequest.ForgotPasswordRequest request
+            @Valid @RequestBody ResetPasswordRequest.ForgotPasswordRequest request
     ) {
         String token = null;
         if (authorization != null && authorization.startsWith("Bearer ")) {
@@ -41,7 +42,7 @@ public class PasswordResetController {
 
     @PatchMapping("/authenticated/reset")
     public ResponseEntity<?> resetAuthenticatedUserPassword(
-            @RequestBody ResetPasswordRequest.AuthenticatedPasswordRequest request
+            @Valid @RequestBody ResetPasswordRequest.AuthenticatedPasswordRequest request
     ) {
         passwordResetService.resetAuthenticatedUserPassword(request.getCurrentPassword(), request.getNewPassword(), request.getConfirmPassword());
         return ResponseEntity.ok("Password updated successfully");

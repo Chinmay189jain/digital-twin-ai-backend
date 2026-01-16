@@ -1,7 +1,9 @@
 package com.digitaltwin.backend.controller;
 
 import com.digitaltwin.backend.dto.JwtResponse;
+import com.digitaltwin.backend.dto.OtpVerifyRequest;
 import com.digitaltwin.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,9 @@ public class EmailController {
     }
 
     @PostMapping("/verify/confirm")
-    public ResponseEntity<JwtResponse> verifyAccountVerificationOtp(@RequestBody String otp) {
-        return ResponseEntity.ok(userService.validateAccountVerificationOtp(otp));
+    public ResponseEntity<JwtResponse> verifyAccountVerificationOtp(
+            @Valid @RequestBody OtpVerifyRequest request
+    ) {
+        return ResponseEntity.ok(userService.validateAccountVerificationOtp(request.getOtp()));
     }
 }

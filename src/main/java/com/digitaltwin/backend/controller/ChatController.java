@@ -6,14 +6,20 @@ import com.digitaltwin.backend.dto.TwinAnswerResponse;
 import com.digitaltwin.backend.dto.TwinQuestionRequest;
 import com.digitaltwin.backend.service.TwinChatService;
 import com.digitaltwin.backend.service.TwinChatSessionService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/twin")
+@Validated // Needed for validating @PathVariable / @RequestParam constraints
 public class ChatController {
 
     @Autowired
@@ -24,7 +30,7 @@ public class ChatController {
 
     // Endpoint to get a response from the AI based on user input
     @PostMapping("/chat")
-    public ResponseEntity<TwinAnswerResponse> getChatResponse(@RequestBody TwinQuestionRequest twinQuestionRequest) {
+    public ResponseEntity<TwinAnswerResponse> getChatResponse(@Valid  @RequestBody TwinQuestionRequest twinQuestionRequest) {
         TwinAnswerResponse answer = twinChatService.getResponse(twinQuestionRequest.getSessionId(), twinQuestionRequest.getUserQuestion());
         return ResponseEntity.ok(answer);
     }
@@ -38,16 +44,20 @@ public class ChatController {
     // Endpoint to get chat history for a specific session with pagination
     @GetMapping("/chat/{sessionId}")
     public ResponseEntity<ChatHistoryResponse> getChatHistory(
-            @PathVariable String sessionId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
+            @PathVariable @NotBlank(message = "sessionId is required") String sessionId,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "page must be >= 0") int page,
+            @RequestParam(defaultValue = "30")
+            @Min(value = 1, message = "size must be >= 1")
+            @Max(value = 200, message = "size must be <= 200") int size
     ) {
         ChatHistoryResponse response = twinChatService.getChatHistory(sessionId, page, size);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("chat/session/{sessionId}" )
-    public ResponseEntity<String> deleteChatSession(@PathVariable String sessionId) {
+    public ResponseEntity<String> deleteChatSession(
+            @PathVariable @NotBlank(message = "sessionId is required") String sessionId
+    ) {
         twinChatService.deleteChatSession(sessionId);
         return ResponseEntity.noContent().build();
     }
