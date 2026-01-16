@@ -1,7 +1,7 @@
 package com.digitaltwin.backend.service;
 
-import com.digitaltwin.backend.dto.ProfileAnswersRequest;
-import com.digitaltwin.backend.dto.ProfileResponse;
+import com.digitaltwin.backend.dto.TwinProfileRequest;
+import com.digitaltwin.backend.dto.TwinProfileResponse;
 import com.digitaltwin.backend.model.ProfileQuestion;
 import com.digitaltwin.backend.model.TwinProfile;
 import com.digitaltwin.backend.repository.ProfileQuestionRepository;
@@ -37,13 +37,13 @@ public class TwinProfileService {
         }
     }
 
-    public String generateProfile(Map<Integer, String> profileAnswersMap) {
+    public String generateProfile(TwinProfileRequest twinProfileRequest) {
         try{
             // Fetch all profile questions from the repository
             List<ProfileQuestion> profileQuestion = profileQuestionRepository.findAllByOrderByIdAsc();
 
             // Combine user answers with question prefixes
-            List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, profileAnswersMap);
+            List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, twinProfileRequest.getProfileAnswers());
 
             // Generate the profile summary using AIService
             String profileSummary = aiService.generateTwinProfile(combinedUserAnswer);
@@ -51,7 +51,7 @@ public class TwinProfileService {
             // Create a new TwinProfile object with the generated summary
             TwinProfile profile = TwinProfile.builder()
                     .userId(userService.getCurrentUserEmail()) // Replace with actual user ID
-                    .profileAnswers(profileAnswersMap)
+                    .profileAnswers(twinProfileRequest.getProfileAnswers())
                     .profileSummary(profileSummary)
                     .createdAt(java.time.LocalDateTime.now())
                     .build();
@@ -65,45 +65,45 @@ public class TwinProfileService {
         }
     }
 
-    public String updateProfile(Map<Integer, String> profileAnswersMap) {
+    public TwinProfileResponse updateProfile(TwinProfileRequest twinProfileRequest) {
         try{
 
             TwinProfile profile = twinProfileRepository.findByUserId(userService.getCurrentUserEmail())
                     .orElseThrow(() -> new RuntimeException("Twin profile not found"));
 
             // If the answers are the same, skip api call and return the existing summary
-            if(Objects.equals(profileAnswersMap, profile.getProfileAnswers())){
-                return profile.getProfileSummary();
+            if(Objects.equals(twinProfileRequest.getProfileAnswers(), profile.getProfileAnswers())){
+                return new TwinProfileResponse(profile.getProfileAnswers(), profile.getProfileSummary());
             }
 
             // Fetch all profile questions from the repository
             List<ProfileQuestion> profileQuestion = profileQuestionRepository.findAllByOrderByIdAsc();
 
             // Combine user answers with question prefixes
-            List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, profileAnswersMap);
+            List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, twinProfileRequest.getProfileAnswers());
 
             // Generate the profile summary using AIService
             String profileSummary = aiService.generateTwinProfile(combinedUserAnswer);
 
             // Create a new TwinProfile object with the generated summary
-            profile.setProfileAnswers(profileAnswersMap);
+            profile.setProfileAnswers(twinProfileRequest.getProfileAnswers());
             profile.setProfileSummary(profileSummary);
 
             // Save the generated profile to the database
             twinProfileRepository.save(profile);
 
-            return  profileSummary;
+            return new TwinProfileResponse(profile.getProfileAnswers(), profile.getProfileSummary());
         } catch (Exception e) {
             throw new RuntimeException("Failed to update twin profile: " + e.getMessage(), e);
         }
     }
 
-    public ProfileResponse getProfile() {
+    public TwinProfileResponse getProfile() {
         try{
             TwinProfile profile = twinProfileRepository.findByUserId(userService.getCurrentUserEmail())
                     .orElseThrow(() -> new RuntimeException("Twin profile not found"));
 
-            return new ProfileResponse(profile.getProfileAnswers(), profile.getProfileSummary());
+            return new TwinProfileResponse(profile.getProfileAnswers(), profile.getProfileSummary());
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve twin profile: " + e.getMessage(), e);
         }
