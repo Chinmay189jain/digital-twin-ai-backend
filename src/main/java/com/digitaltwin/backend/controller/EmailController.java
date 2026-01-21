@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/account")
 public class EmailController {
@@ -21,7 +23,9 @@ public class EmailController {
     }
 
     @PostMapping("/verify/confirm")
-    public ResponseEntity<JwtResponse> verifyAccountVerificationOtp(@RequestBody OtpRequest.ConfirmOtpRequest request) {
+    public ResponseEntity<JwtResponse> verifyAccountVerificationOtp(
+            @Valid  @RequestBody OtpRequest.ConfirmOtpRequest request
+    ) {
         return ResponseEntity.ok(userService.validateAccountVerificationOtp(request.getOtpCode()));
     }
 }
