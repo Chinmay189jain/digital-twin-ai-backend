@@ -26,14 +26,14 @@ public class ProfileController {
 
     //Generate twin profile based on user answers
     @PostMapping("/generate-profile")
-    public ResponseEntity<String> generateTwinProfile(@RequestBody Map<Integer, String> profileAnswersMap) {
-        return ResponseEntity.ok(twinProfileService.generateProfile(profileAnswersMap));
+    public ResponseEntity<String> generateTwinProfile(@RequestBody ProfileAnswersRequest profileAnswersRequest) {
+        return ResponseEntity.ok(twinProfileService.generateProfile(profileAnswersRequest.getProfileAnswers()));
     }
 
     //Generate twin profile based on user answers
     @PostMapping("/update-profile")
-    public ResponseEntity<String> updateTwinProfile(@RequestBody Map<Integer, String> profileAnswersMap) {
-        return ResponseEntity.ok(twinProfileService.updateProfile(profileAnswersMap));
+    public ResponseEntity<String> updateTwinProfile(@RequestBody ProfileAnswersRequest profileAnswersRequest) {
+        return ResponseEntity.ok(twinProfileService.updateProfile(profileAnswersRequest.getProfileAnswers()));
     }
 
     // Get the digital twin profile

@@ -1,6 +1,5 @@
 package com.digitaltwin.backend.service;
 
-import com.digitaltwin.backend.dto.ProfileAnswersRequest;
 import com.digitaltwin.backend.dto.ProfileResponse;
 import com.digitaltwin.backend.model.ProfileQuestion;
 import com.digitaltwin.backend.model.TwinProfile;
@@ -29,6 +28,9 @@ public class TwinProfileService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TwinProfileCacheService twinProfileCacheService;
+
     public List<ProfileQuestion> getProfileQuestions() {
         try{
             return profileQuestionRepository.findAllByOrderByIdAsc();
@@ -39,18 +41,20 @@ public class TwinProfileService {
 
     public String generateProfile(Map<Integer, String> profileAnswersMap) {
         try{
+            final String email = userService.getCurrentUserEmail();
+
             // Fetch all profile questions from the repository
             List<ProfileQuestion> profileQuestion = profileQuestionRepository.findAllByOrderByIdAsc();
 
             // Combine user answers with question prefixes
             List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, profileAnswersMap);
 
-            // Generate the profile summary using AIService
+            // Generate the profile summary using GroqAIService
             String profileSummary = aiService.generateTwinProfile(combinedUserAnswer);
 
             // Create a new TwinProfile object with the generated summary
             TwinProfile profile = TwinProfile.builder()
-                    .userId(userService.getCurrentUserEmail()) // Replace with actual user ID
+                    .userId(email) // Replace with actual user ID
                     .profileAnswers(profileAnswersMap)
                     .profileSummary(profileSummary)
                     .createdAt(java.time.LocalDateTime.now())
@@ -58,6 +62,9 @@ public class TwinProfileService {
 
             // Save the generated profile to the database
             twinProfileRepository.save(profile);
+
+            // remove old cache if any, so that next read will get updated value
+            twinProfileCacheService.evictProfile(email);
 
             return  profileSummary;
         } catch (Exception e) {
@@ -68,7 +75,9 @@ public class TwinProfileService {
     public String updateProfile(Map<Integer, String> profileAnswersMap) {
         try{
 
-            TwinProfile profile = twinProfileRepository.findByUserId(userService.getCurrentUserEmail())
+            final String email = userService.getCurrentUserEmail();
+
+            TwinProfile profile = twinProfileRepository.findByUserId(email)
                     .orElseThrow(() -> new RuntimeException("Twin profile not found"));
 
             // If the answers are the same, skip api call and return the existing summary
@@ -82,7 +91,7 @@ public class TwinProfileService {
             // Combine user answers with question prefixes
             List<String> combinedUserAnswer = createPromptOfProfileAnswers(profileQuestion, profileAnswersMap);
 
-            // Generate the profile summary using AIService
+            // Generate the profile summary using GroqAIService
             String profileSummary = aiService.generateTwinProfile(combinedUserAnswer);
 
             // Create a new TwinProfile object with the generated summary
@@ -92,6 +101,9 @@ public class TwinProfileService {
             // Save the generated profile to the database
             twinProfileRepository.save(profile);
 
+            // remove old cache if any, so that next read will get updated value
+            twinProfileCacheService.evictProfile(email);
+
             return  profileSummary;
         } catch (Exception e) {
             throw new RuntimeException("Failed to update twin profile: " + e.getMessage(), e);
@@ -99,14 +111,8 @@ public class TwinProfileService {
     }
 
     public ProfileResponse getProfile() {
-        try{
-            TwinProfile profile = twinProfileRepository.findByUserId(userService.getCurrentUserEmail())
-                    .orElseThrow(() -> new RuntimeException("Twin profile not found"));
-
-            return new ProfileResponse(profile.getProfileAnswers(), profile.getProfileSummary());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve twin profile: " + e.getMessage(), e);
-        }
+        String email = userService.getCurrentUserEmail();
+        return twinProfileCacheService.getProfile(email);
     }
 
     public List<String> createPromptOfProfileAnswers(List<ProfileQuestion> profileQuestionList, Map<Integer, String> profileAnswersMap) {
@@ -135,7 +141,9 @@ public class TwinProfileService {
 
     public long deleteAllProfilesByUserId(String userId) {
         try {
-            return twinProfileRepository.deleteByUserId(userId);
+            long deleted = twinProfileRepository.deleteByUserId(userId);
+            twinProfileCacheService.evictProfile(userId);
+            return deleted;
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete twin profile by user ID", e);
         }

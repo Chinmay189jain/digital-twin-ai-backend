@@ -1,6 +1,5 @@
 package com.digitaltwin.backend.model;
 
-import com.digitaltwin.backend.dto.ProfileAnswersRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
