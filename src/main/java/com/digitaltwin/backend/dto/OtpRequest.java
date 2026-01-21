@@ -25,4 +25,11 @@ public class OtpRequest {
         @Pattern(regexp = "^[0-9]{6}$", message = "OTP must be a 6-digit number")
         private String otpCode;
     }
+
+    @Data
+    public static class ConfirmOtpRequest {
+        @NotBlank(message = "OTP code is required")
+        @Pattern(regexp = "^[0-9]{6}$", message = "OTP must be a 6-digit number")
+        private String otpCode;
+    }
 }

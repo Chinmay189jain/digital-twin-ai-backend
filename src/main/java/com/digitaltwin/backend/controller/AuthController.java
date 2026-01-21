@@ -3,7 +3,6 @@ package com.digitaltwin.backend.controller;
 import com.digitaltwin.backend.dto.LoginRequest;
 import com.digitaltwin.backend.dto.UserRegistration;
 import com.digitaltwin.backend.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +16,13 @@ public class AuthController {
 
     // Register endpoint
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRegistration request) {
+    public ResponseEntity<?> register(@RequestBody UserRegistration request) {
         return userService.registerUser(request);
     }
 
     // Login endpoint
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid  @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         return userService.loginUser(request);
     }
 }
