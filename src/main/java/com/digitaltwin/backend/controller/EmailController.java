@@ -3,7 +3,7 @@ package com.digitaltwin.backend.controller;
 import com.digitaltwin.backend.dto.JwtResponse;
 import com.digitaltwin.backend.dto.OtpRequest;
 import com.digitaltwin.backend.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +11,10 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/account")
+@RequiredArgsConstructor
 public class EmailController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping("/verify/send")
     public ResponseEntity<?> requestAccountVerificationOtp() {

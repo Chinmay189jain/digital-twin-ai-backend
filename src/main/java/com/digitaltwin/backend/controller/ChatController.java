@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +19,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/twin")
+@RequiredArgsConstructor
 @Validated // Needed for validating @PathVariable / @RequestParam constraints
 public class ChatController {
 
-    @Autowired
-    TwinChatService twinChatService;
+    private final TwinChatService twinChatService;
 
-    @Autowired
-    TwinChatSessionService twinChatSessionService;
+    private final TwinChatSessionService twinChatSessionService;
 
     // Endpoint to get a response from the AI based on user input
     @PostMapping("/chat")

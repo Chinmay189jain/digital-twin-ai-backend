@@ -3,18 +3,18 @@ package com.digitaltwin.backend.service;
 import com.digitaltwin.backend.dto.TwinProfileResponse;
 import com.digitaltwin.backend.model.TwinProfile;
 import com.digitaltwin.backend.repository.TwinProfileRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class TwinProfileCacheService {
 
-    @Autowired
-    private TwinProfileRepository twinProfileRepository;
+    private final TwinProfileRepository twinProfileRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(TwinProfileCacheService.class);
 
