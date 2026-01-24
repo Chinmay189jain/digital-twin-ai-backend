@@ -5,7 +5,6 @@ import com.digitaltwin.backend.repository.TwinProfileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +18,20 @@ public class GeminiAIService implements AIService{
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiAIService.class);
 
-    @Autowired
-    private TwinProfileRepository twinProfileRepository;
+    private final TwinProfileRepository twinProfileRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     private final ChatClient chatClient;
 
-    public GeminiAIService(ChatClient.Builder chatClientBuilder) {
+    public GeminiAIService(
+            ChatClient.Builder chatClientBuilder,
+            TwinProfileRepository twinProfileRepository,
+            UserService userService
+    ) {
         this.chatClient = chatClientBuilder.build();
+        this.userService = userService;
+        this.twinProfileRepository = twinProfileRepository;
     }
 
     @Override

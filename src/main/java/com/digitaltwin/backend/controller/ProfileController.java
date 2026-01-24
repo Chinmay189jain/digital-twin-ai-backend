@@ -4,7 +4,7 @@ import com.digitaltwin.backend.dto.TwinProfileRequest;
 import com.digitaltwin.backend.dto.TwinProfileResponse;
 import com.digitaltwin.backend.model.ProfileQuestion;
 import com.digitaltwin.backend.service.TwinProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/ai")
+@RequiredArgsConstructor
 public class ProfileController {
 
-    @Autowired
-    private TwinProfileService twinProfileService;
+    private final TwinProfileService twinProfileService;
 
     // Get profile questions
     @GetMapping("/profile-questions")

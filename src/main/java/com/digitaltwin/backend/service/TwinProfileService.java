@@ -6,7 +6,7 @@ import com.digitaltwin.backend.model.ProfileQuestion;
 import com.digitaltwin.backend.model.TwinProfile;
 import com.digitaltwin.backend.repository.ProfileQuestionRepository;
 import com.digitaltwin.backend.repository.TwinProfileRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,22 +15,18 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class TwinProfileService {
 
-    @Autowired
-    private TwinProfileRepository twinProfileRepository;
+    private final TwinProfileRepository twinProfileRepository;
 
-    @Autowired
-    private ProfileQuestionRepository profileQuestionRepository;
+    private final ProfileQuestionRepository profileQuestionRepository;
 
-    @Autowired
-    private AIService aiService;
+    private final AIService aiService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private TwinProfileCacheService twinProfileCacheService;
+    private final TwinProfileCacheService twinProfileCacheService;
 
     public List<ProfileQuestion> getProfileQuestions() {
         try{

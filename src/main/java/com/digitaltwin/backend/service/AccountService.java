@@ -1,23 +1,20 @@
 package com.digitaltwin.backend.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
 
-    @Autowired
-    private TwinChatService twinChatService;
+    private final TwinChatService twinChatService;
 
-    @Autowired
-    private TwinChatSessionService twinChatSessionService;
+    private final TwinChatSessionService twinChatSessionService;
 
-    @Autowired
-    private TwinProfileService twinProfileService;
+    private final TwinProfileService twinProfileService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Transactional
     public void deleteCurrentUserAccount() {

@@ -6,7 +6,7 @@ import com.digitaltwin.backend.model.TwinChat;
 import com.digitaltwin.backend.model.TwinChatSession;
 import com.digitaltwin.backend.repository.TwinChatRepository;
 import com.mongodb.lang.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -19,19 +19,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TwinChatService {
 
-    @Autowired
-    private TwinChatRepository twinChatRepository;
+    private final TwinChatRepository twinChatRepository;
 
-    @Autowired
-    private TwinChatSessionService twinChatSessionService;
+    private final TwinChatSessionService twinChatSessionService;
 
-    @Autowired
-    private AIService aiService;
+    private final AIService aiService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     // Process user question and return AI response, managing chat sessions
     public TwinAnswerResponse getResponse(@Nullable String sessionId, String userQuestion) {

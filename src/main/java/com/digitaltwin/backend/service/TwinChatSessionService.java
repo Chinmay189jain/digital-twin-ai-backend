@@ -4,20 +4,19 @@ import com.digitaltwin.backend.dto.ChatSessionListItem;
 import com.digitaltwin.backend.model.TwinChatSession;
 import com.digitaltwin.backend.repository.TwinChatSessionRepository;
 import com.mongodb.lang.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class TwinChatSessionService {
 
-    @Autowired
-    private TwinChatSessionRepository twinChatSessionRepository;
+    private final TwinChatSessionRepository twinChatSessionRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     public TwinChatSession createSession(String email, String userQuestion) {
         try {

@@ -5,16 +5,16 @@ import com.digitaltwin.backend.dto.JwtResponse;
 import com.digitaltwin.backend.dto.OtpRequest;
 import com.digitaltwin.backend.service.PasswordResetService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/password/change")
+@RequiredArgsConstructor
 public class PasswordResetController {
 
-    @Autowired
-    private PasswordResetService passwordResetService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/forgot/mail/send")
     public ResponseEntity<?> requestPasswordResetOtp(@Valid  @RequestBody OtpRequest.SendOtpRequest request) {

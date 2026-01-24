@@ -4,9 +4,9 @@ import com.digitaltwin.backend.model.OtpToken;
 import com.digitaltwin.backend.repository.OtpTokenRepository;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -25,6 +25,7 @@ import java.util.Optional;
 import static com.digitaltwin.backend.util.ConstantsTemplate.*;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
@@ -41,17 +42,13 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String senderEmail;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    @Autowired
-    private OtpTokenRepository otpTokenRepository;
+    private final OtpTokenRepository otpTokenRepository;
 
-    @Autowired
-    private ResourceLoader resourceLoader;
+    private final ResourceLoader resourceLoader;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public void generateOtp(String userEmail, OtpPurpose purpose) {
         try {
