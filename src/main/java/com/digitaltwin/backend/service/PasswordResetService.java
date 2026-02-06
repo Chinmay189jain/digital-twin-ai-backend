@@ -14,11 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class PasswordResetService {
 
     private final UserService userService;
-
     private final JwtService jwtService;
-
     private final EmailService emailService;
-
     private final PasswordEncoder passwordEncoder;
 
     public void sendPasswordResetEmail(String userEmail) {

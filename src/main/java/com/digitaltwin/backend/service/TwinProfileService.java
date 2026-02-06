@@ -8,7 +8,6 @@ import com.digitaltwin.backend.repository.ProfileQuestionRepository;
 import com.digitaltwin.backend.repository.TwinProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +18,9 @@ import java.util.Objects;
 public class TwinProfileService {
 
     private final TwinProfileRepository twinProfileRepository;
-
     private final ProfileQuestionRepository profileQuestionRepository;
-
     private final AIService aiService;
-
     private final UserService userService;
-
     private final TwinProfileCacheService twinProfileCacheService;
 
     public List<ProfileQuestion> getProfileQuestions() {

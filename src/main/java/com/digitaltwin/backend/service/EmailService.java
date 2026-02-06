@@ -43,11 +43,8 @@ public class EmailService {
     private String senderEmail;
 
     private final JavaMailSender mailSender;
-
     private final OtpTokenRepository otpTokenRepository;
-
     private final ResourceLoader resourceLoader;
-
     private final PasswordEncoder passwordEncoder;
 
     public void generateOtp(String userEmail, OtpPurpose purpose) {
