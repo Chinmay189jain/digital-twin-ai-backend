@@ -9,11 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountService {
 
     private final TwinChatService twinChatService;
-
     private final TwinChatSessionService twinChatSessionService;
-
     private final TwinProfileService twinProfileService;
-
     private final UserService userService;
 
     @Transactional

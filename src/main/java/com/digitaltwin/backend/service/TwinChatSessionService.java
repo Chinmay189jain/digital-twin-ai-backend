@@ -15,7 +15,6 @@ import java.util.Objects;
 public class TwinChatSessionService {
 
     private final TwinChatSessionRepository twinChatSessionRepository;
-
     private final UserService userService;
 
     public TwinChatSession createSession(String email, String userQuestion) {

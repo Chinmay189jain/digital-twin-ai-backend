@@ -33,6 +33,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/**").permitAll() // Allow unauthenticated access to /auth
                     .requestMatchers("/api/password/change/forgot/**").permitAll() // Allow unauthenticated access to password reset
+                    .requestMatchers("/ws/**", "/ws").permitAll()   // allow websocket handshake
                 .anyRequest().authenticated() // Require auth for everything else
             )
                 .exceptionHandling(ex -> ex

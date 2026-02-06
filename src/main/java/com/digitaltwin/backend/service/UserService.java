@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.Optional;
 
 @Service
@@ -24,13 +23,9 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
-
     private final EmailService emailService;
 
     public User saveUser(User user) {
@@ -49,6 +44,9 @@ public class UserService {
     // This method retrieves the current user's email from the security context
     public String getCurrentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new IllegalStateException("No Authentication in SecurityContext (likely async/reactive thread). Use Principal instead.");
+        }
         return authentication.getName(); // This gives the email from JWT
     }
 

@@ -3,9 +3,7 @@ package com.digitaltwin.backend.service;
 import com.digitaltwin.backend.dto.ChatHistoryResponse;
 import com.digitaltwin.backend.dto.TwinAnswerResponse;
 import com.digitaltwin.backend.model.TwinChat;
-import com.digitaltwin.backend.model.TwinChatSession;
 import com.digitaltwin.backend.repository.TwinChatRepository;
-import com.mongodb.lang.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,48 +20,8 @@ import java.util.stream.Collectors;
 public class TwinChatService {
 
     private final TwinChatRepository twinChatRepository;
-
     private final TwinChatSessionService twinChatSessionService;
-
-    private final AIService aiService;
-
     private final UserService userService;
-
-    // Process user question and return AI response, managing chat sessions
-    public TwinAnswerResponse getResponse(@Nullable String sessionId, String userQuestion) {
-        try {
-
-            final String email = userService.getCurrentUserEmail();
-
-            if (isBlank(userQuestion)) throw new IllegalArgumentException("Question cannot be empty");
-
-            // Get AI response
-            String aiResponse = aiService.respondAsTwin(userQuestion);
-
-            // Create or retrieve the chat session based on the provided sessionId
-            TwinChatSession session;
-            if(isBlank(sessionId)) {
-                session = twinChatSessionService.createSession(email, userQuestion);
-            } else {
-                session = twinChatSessionService.getSession(email, sessionId);
-            }
-
-            TwinChat chat = TwinChat.builder()
-                    .userId(email)
-                    .sessionId(session.getId())
-                    .question(userQuestion)
-                    .aiResponse(aiResponse)
-                    .timestamp(java.time.LocalDateTime.now())
-                    .build();
-
-            // Save the chat interaction to the database
-            twinChatRepository.save(chat);
-
-            return new TwinAnswerResponse(session.getId(), chat.getQuestion(), chat.getAiResponse(), chat.getTimestamp());
-        } catch (Exception e) {
-            throw new RuntimeException("Error in getResponse: " + e.getMessage());
-        }
-    }
 
     // Retrieve chat history for a specific session
     public ChatHistoryResponse getChatHistory(String sessionId, int page, int size) {

@@ -2,11 +2,8 @@ package com.digitaltwin.backend.controller;
 
 import com.digitaltwin.backend.dto.ChatHistoryResponse;
 import com.digitaltwin.backend.dto.ChatSessionListItem;
-import com.digitaltwin.backend.dto.TwinAnswerResponse;
-import com.digitaltwin.backend.dto.TwinQuestionRequest;
 import com.digitaltwin.backend.service.TwinChatService;
 import com.digitaltwin.backend.service.TwinChatSessionService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -24,15 +20,7 @@ import java.util.List;
 public class ChatController {
 
     private final TwinChatService twinChatService;
-
     private final TwinChatSessionService twinChatSessionService;
-
-    // Endpoint to get a response from the AI based on user input
-    @PostMapping("/chat")
-    public ResponseEntity<TwinAnswerResponse> getChatResponse(@Valid  @RequestBody TwinQuestionRequest twinQuestionRequest) {
-        TwinAnswerResponse answer = twinChatService.getResponse(twinQuestionRequest.getSessionId(), twinQuestionRequest.getUserQuestion());
-        return ResponseEntity.ok(answer);
-    }
 
     // Endpoint to get chat history with optional search query
     @GetMapping("/chat/sessions")
