@@ -15,20 +15,20 @@ public class PasswordResetService {
 
     private final UserService userService;
     private final JwtService jwtService;
-    private final EmailService emailService;
+    private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
 
     public void sendPasswordResetEmail(String userEmail) {
         User user = userService.findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
-        emailService.generateOtp(user.getEmail(), OtpPurpose.PASSWORD_RESET);
+        otpService.generateOtp(user.getEmail(), OtpPurpose.PASSWORD_RESET);
     }
 
     public JwtResponse validatePasswordResetOtp(String userEmail, String otpCode) {
         User user = userService.findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
-        boolean isValid = emailService.validateOtp(user.getEmail(), otpCode, OtpPurpose.PASSWORD_RESET);
+        boolean isValid = otpService.validateOtp(user.getEmail(), otpCode, OtpPurpose.PASSWORD_RESET);
 
         if (!isValid) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired OTP");
