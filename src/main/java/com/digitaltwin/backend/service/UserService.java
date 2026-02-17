@@ -26,7 +26,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final EmailService emailService;
+    private final OtpService otpService;
 
     public User saveUser(User user) {
         return userRepository.save(user);
@@ -94,7 +94,7 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
         if (!user.isVerified()) {
-            emailService.generateOtp(userEmail, OtpPurpose.ACCOUNT_VERIFICATION);
+            otpService.generateOtp(userEmail, OtpPurpose.ACCOUNT_VERIFICATION);
         }
     }
 
@@ -108,7 +108,7 @@ public class UserService {
             return new JwtResponse(token);
         }
 
-        boolean isValid = emailService.validateOtp(userEmail, otp, OtpPurpose.ACCOUNT_VERIFICATION);
+        boolean isValid = otpService.validateOtp(userEmail, otp, OtpPurpose.ACCOUNT_VERIFICATION);
         if (isValid) {
             user.setVerified(true);
             saveUser(user);
